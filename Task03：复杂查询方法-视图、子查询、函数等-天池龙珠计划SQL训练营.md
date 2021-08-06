@@ -247,3 +247,253 @@ FROM product AS  p1;
 
 #### 字符串函数
 
+- **CONCAT – 拼接**
+
+  语法：`CONCAT(str1, str2, str3)`
+
+  - **如果str1，2，3中有一个为NULL，则结果为NULL**
+
+- **LENGTH – 字符串长度**
+
+  语法：`LENGTH( 字符串 )`
+
+- **LOWER – 小写转换**
+
+  LOWER 函数**只能针对英文字母使用**，它会将参数中的字符串全都转换为小写。该函数不适用于英文字母以外的场合，不影响原本就是小写的字符。
+
+  类似的， **UPPER** 函数用于大写转换。
+
+
+
+- **REPLACE – 字符串的替换**
+
+  语法：`REPLACE( 对象字符串，替换前的字符串，替换后的字符串 )`
+
+- **SUBSTRING – 字符串的截取**
+
+  语法：`SUBSTRING （对象字符串 FROM 截取的起始位置 FOR 截取的字符数）`
+
+  **计数从1开始**
+
+
+
+- **（扩展内容）SUBSTRING_INDEX – 字符串按索引截取**
+  - SELECT SUBSTRING_INDEX('www.mysql.com', '.', 1);  -- www
+    SELECT SUBSTRING_INDEX('www.mysql.com', '.', -1); -- com
+    SELECT SUBSTRING_INDEX('www.mysql.com', '.', 2); -- www.mysql
+    SELECT SUBSTRING_INDEX('www.mysql.com', '.', -2); -- mysql.com
+
+
+
+<img src="https://img.alicdn.com/imgextra/i3/O1CN01TZlSc01FJTDyUH8Ud_!!6000000000466-2-tps-801-534.png" style="zoom:80%;" />
+
+
+
+
+
+
+
+
+
+#### 日期函数
+
+注意，不同DBMS的日期函数可能存在不同。
+
+- **SELECT CURRENT_DATE;**
+
+  - CURRENT_DATE – 获取当前日期
+
+- **SELECT CURRENT_TIME;**
+
+  - **CURRENT_TIME – 当前时间**
+
+- **SELECT CURRENT_TIMESTAMP;**
+
+  - CURRENT_TIMESTAMP – 当前日期和时间
+
+- **EXTRACT – 截取日期元素**
+
+  语法：`EXTRACT(日期元素 FROM 日期)`
+
+  使用 EXTRACT 函数可以截取出日期数据中的一部分，例如“年”
+
+  “月”，或者“小时”“秒”等。该函数的返回值并不是日期类型而是**数值类型**
+
+  - ```mysql
+    SELECT CURRENT_TIMESTAMP as now, 
+    EXTRACT(YEAR   FROM CURRENT_TIMESTAMP) AS year, 
+    EXTRACT(MONTH  FROM CURRENT_TIMESTAMP) AS month, 
+    EXTRACT(DAY    FROM CURRENT_TIMESTAMP) AS day,
+    EXTRACT(HOUR   FROM CURRENT_TIMESTAMP) AS hour, 
+    EXTRACT(MINUTE FROM CURRENT_TIMESTAMP) AS MINute, 
+    EXTRACT(SECOND FROM CURRENT_TIMESTAMP) AS second;
+    ```
+
+
+
+#### 转换函数
+
+“转换”这个词的含义非常广泛，在 SQL 中主要有两层意思：
+
+一是数据类型的转换，简称为**类型转换**，在英语中称为`cast`；
+
+另一层意思是**值的转换**。
+
+ 
+
+- CAST – 类型转换
+
+语法：`CAST（转换前的值 AS 想要转换的数据类型）`
+
+```mysql
+SELECT CAST('0001' AS SIGNED INTEGER) AS int_col;
+```
+
+- **COALESCE – 将NULL转换为其他值**
+
+语法：`COALESCE(数据1，数据2，数据3……)`
+
+COALESCE 是 SQL 特有的函数。该函数会**返回可变参数 A 中左侧开始第 1个不是NULL的值**。参数个数是可变的，因此可以根据需要无限增加。
+
+在 SQL 语句中将 NULL 转换为其他值时就会用到转换函数。
+
+```mysql
+SELECT COALESCE(NULL, 11) AS col_1,
+COALESCE(NULL, 'hello world', NULL) AS col_2,
+COALESCE(NULL, NULL, '2020-11-01') AS col_3;
++-------+-------------+------------+
+| col_1 | col_2       | col_3      |
++-------+-------------+------------+
+|    11 | hello world | 2020-11-01 |
++-------+-------------+------------+
+1 row in set (0.00 sec)
+```
+
+
+
+
+
+---
+
+
+
+
+
+
+
+## 4、谓词
+
+谓词就是返回值为真值的函数。包括`TRUE / FALSE / UNKNOWN`。
+
+谓词主要有以下几个：
+
+- **LIKE**
+- **BETWEEN**
+- **IS NULL、IS NOT NULL**
+- **IN**
+- **EXISTS**
+
+
+
+#### LIKE谓词 – 用于字符串的部分一致查询
+
+当需要进行字符串的部分一致查询时需要使用该谓词。
+
+部分一致大体可以分为前方一致、中间一致和后方一致三种类型。
+
+- 前方一致：选取出“dddabc”
+
+  - ```my
+    SELECT *
+    FROM samplelike
+    WHERE strcol LIKE 'ddd%';
+    ```
+
+  - 其中**的`%`是**代表“**零个或多个任意字符串**”的特殊符号，本例中代表“以ddd开头的所有字符串”。
+
+- 中间一致：选取出“abcddd”,“dddabc”,“abdddc”
+
+  - ```my
+    SELECT *
+    FROM samplelike
+    WHERE strcol LIKE '%ddd%';
+    ```
+
+- 后方一致：选取出“abcddd“
+
+  - ```my
+    SELECT *
+    FROM samplelike
+    WHERE strcol LIKE '%ddd';
+    ```
+
+  综合如上三种类型的查询可以看出，查询条件最宽松，也就是能够取得最多记录的是**`中间一致`**。这是因为它同时包含前方一致和后方一致的查询结果。
+
+- `_`下划线匹配任意 1 个字符
+
+  使用 _（下划线）来代替 %，与 % 不同的是，它代表了“任意 1 个字符”。
+
+
+
+
+
+####  BETWEEN谓词 – 用于范围查询
+
+```mysql
+-- 选取销售单价为100～ 1000元的商品
+SELECT product_name, sale_price
+FROM product
+WHERE sale_price BETWEEN 100 AND 1000;
+```
+
+BETWEEN 的特点就是结果中会包含 100 和 1000 这两个临界值，也就是**闭区间**。如果不想让结果中包含临界值，那就必须使用 < 和 >。
+
+
+
+
+
+
+
+####  IS NULL、 IS NOT NULL – 用于判断是否为NULL
+
+#### IN谓词 – OR的简便用法
+
+- 谓词 无法与 NULL 进行比较
+- 
+- **NOT IN 的参数中不能包含 NULL**，否则，查询结果通常为空
+
+#### 使用子查询作为IN谓词的参数
+
+###  EXIST 谓词
+
+
+
+
+
+## 5、case表达式
+
+- 不要忘记加 END
+
+
+
+
+
+- **当待转换列为数字时，可以使用**`SUM AVG MAX MIN`**等聚合函数；**
+- **当待转换列为文本时，可以使用**`MAX MIN`**等聚合函数**
+
+---
+
+习题3.7：
+
+```mysql
+SELECT SUM(CASE WHEN sale_price <= 1000 THEN 1 ELSE 0 END) AS
+low_price,
+ SUM(CASE WHEN sale_price BETWEEN 1001 AND 3000 THEN 1 ELSE 0 END) AS
+mid_price,
+ SUM(CASE WHEN sale_price >= 3001 THEN 1 ELSE 0 END) AS
+high_price
+ FROM product;
+```
+
+SUM不能换成  COUNT， 否则结果不对
+
